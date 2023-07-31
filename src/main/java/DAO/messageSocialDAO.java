@@ -126,4 +126,20 @@ public class messageSocialDAO {
         }
         return resultList;
     }
+
+
+    //Following methods are not necessary for this project but may be useful if the project gets expanded or for manual testing
+    //Delete all messages
+    public void removeMessages(){
+        Connection messageConnection = ConnectionUtil.getConnection();
+        String sql = "DELETE FROM message"; //THIS IS NOT A GOOD IDEA BUT MAY BE NECESSARY.  Not for the purpose of this project but better to include for future use. 
+
+        try {
+            Statement s = messageConnection.createStatement();
+            s.executeUpdate(sql);
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        
+    }
 }

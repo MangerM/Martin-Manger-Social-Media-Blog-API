@@ -12,30 +12,50 @@ import io.javalin.Javalin;
 public class Main {
     public static void main(String[] args) {
         SocialMediaController controller = new SocialMediaController();
-        Account signedInUser;
-
-
+        
         Javalin app = controller.startAPI();
         app.start(8080);
 
+        //Manual Testing Code
+        /*
+        
         accountService aService = new accountService();
         messageService mService = new messageService();
-        
-        Account newUser = new Account("mmanger", "Pa55w0rd");
-        aService.newAccount(newUser);
-        aService.newAccount(new Account("bbstyger30", "Password"));
-        signedInUser = aService.login("mmanger", "Pa55w0rd");
+        Account signedInUser;
+        Account newUser = new Account("user20", "123type");
+
+        //Account Testing
+        //New Account
+        aService.newAccount(newUser);  
+        aService.newAccount(new Account("dude2", "dudebro"));
+
+        //Login Testing
+        signedInUser = aService.login("user20", "123type");
+
+
+        //Message Testing
+        //Create Message
         if(signedInUser != null){
             Message newMessage = new Message(signedInUser.getAccount_id(), "This is a message for Jim", 152333418);
             mService.createMessage(newMessage);
         }
-        System.out.println(aService.getAllAccounts());
+
+        //Get all Messages
         System.out.println(mService.getAllMessages());
+
+        //Get Message by ID
+        System.out.println(mService.getMessageByID(1));
+
+        //Delete Message
+        Message deletedMessage = mService.deleteMessageByID(1);
+        System.out.println("Deleted Message: " + deletedMessage);
+
+        //Update Message
         Message updatedMessage = mService.updateMessage(1, "This is new message text");
         System.out.println(updatedMessage);
+        
+        //Get all Messages by User
         System.out.println(mService.userMessages(signedInUser.getAccount_id()));
-        System.out.println(mService.getAllMessages());
-        Message deletedMessage = mService.deleteMessageByID(5);
-        System.out.println("Deleted Message: " + deletedMessage);
+        */
     }
 }

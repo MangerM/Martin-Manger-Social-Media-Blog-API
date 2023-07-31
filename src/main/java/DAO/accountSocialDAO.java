@@ -10,51 +10,6 @@ import Util.ConnectionUtil;
 public class accountSocialDAO {
     //Necessary DAO actions for accessing/manipulating account table
 
-    //Get all accounts
-    public List<Account> getAllAccounts(){
-        Connection accountConnection = ConnectionUtil.getConnection();
-        List<Account> resultList = new ArrayList<>();
-        //We want all existing accounts in full detail so SELECT * works for us.
-        try {
-            String sql = "SELECT * FROM account";
-
-            PreparedStatement preparedStatement = accountConnection.prepareStatement(sql);
-            ResultSet rs = preparedStatement.executeQuery();
-            while(rs.next()){
-                Account givenAccount = new Account(rs.getInt("account_id"), rs.getString("username"), rs.getString("password"));
-                resultList.add(givenAccount);
-            }
-        }catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-        return resultList;
-    }
-
-    //Login
-    public Account loginAccount(String username, String password){
-        Connection accountConnection = ConnectionUtil.getConnection();
-        //We need to find an existing user with the username and password combination.  Since the person may not exist we pass null if they don't exist.
-        //Similar to get account by ID but using username and password instead
-        try {
-            String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
-
-            
-            PreparedStatement preparedStatement = accountConnection.prepareStatement(sql);
-            preparedStatement.setString(1,username);
-            preparedStatement.setString(2,password);
-
-            ResultSet rs = preparedStatement.executeQuery();
-            while(rs.next()){
-                Account returnedAccount = new Account(rs.getInt("account_id"), rs.getString("username"),
-                        rs.getString("password"));
-                return returnedAccount;
-            }
-        }catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-        return null;
-    }
-
     //Get Existing Username
     public Account verifyUsername(String username){
         Connection accountConnection = ConnectionUtil.getConnection();
@@ -81,7 +36,7 @@ public class accountSocialDAO {
     //Verify userID
     public Account verifyUserID(int userID){
         Connection accountConnection = ConnectionUtil.getConnection();
-        //We need to see if the username already exists
+        //We need to see if the userID already exists
         try {
             String sql = "SELECT * FROM account WHERE account_id = ?";
 
@@ -100,6 +55,33 @@ public class accountSocialDAO {
         }
         return null;
     }
+
+    //Login
+    public Account loginAccount(String username, String password){
+        Connection accountConnection = ConnectionUtil.getConnection();
+        //We need to find an existing user with the username and password combination.  Since the person may not exist we pass null if they don't exist.
+        //Similar to verify userID but using username and password instead
+        try {
+            String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
+
+            
+            PreparedStatement preparedStatement = accountConnection.prepareStatement(sql);
+            preparedStatement.setString(1,username);
+            preparedStatement.setString(2,password);
+
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                Account returnedAccount = new Account(rs.getInt("account_id"), rs.getString("username"),
+                        rs.getString("password"));
+                return returnedAccount;
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
+    
 
     //Add a new account
     public Account addAccount(Account newAccount){
@@ -128,6 +110,9 @@ public class accountSocialDAO {
         }
         return null;
     }
+
+
+    //The following methods are not necessary for this project but are useful for manual testing or potential future use if the project expands
 
     //Remove all or a particular account (not necessary for this project but included for future use)
     public void removeAllAccounts(){
@@ -169,5 +154,25 @@ public class accountSocialDAO {
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
+    }
+
+    //Get all accounts (not necessary for this project but included for future use and testing)
+    public List<Account> getAllAccounts(){
+        Connection accountConnection = ConnectionUtil.getConnection();
+        List<Account> resultList = new ArrayList<>();
+        //We want all existing accounts in full detail so SELECT * works for us.
+        try {
+            String sql = "SELECT * FROM account";
+
+            PreparedStatement preparedStatement = accountConnection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                Account givenAccount = new Account(rs.getInt("account_id"), rs.getString("username"), rs.getString("password"));
+                resultList.add(givenAccount);
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return resultList;
     }
 }
