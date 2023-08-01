@@ -27,6 +27,7 @@ public class messageSocialDAO {
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
+        //As result list is defaulted to a new blank arraylist we can safely return it here as it will either have all the records from the result set or be blank
         return resultList;
     };
 
@@ -46,6 +47,7 @@ public class messageSocialDAO {
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
+        //As givenMessage is defaulted to null we can safely return it here as it will either have the record from the result set or be null
         return givenMessage;
     }
 
@@ -53,7 +55,8 @@ public class messageSocialDAO {
     public int removeMessageByID(int id){
         Connection messageConnection = ConnectionUtil.getConnection();
         String sql = "DELETE FROM message WHERE message_id = ?";
-
+        //Given this is a delete command we will be returning the number of lines updated/removed.  If we succeed at deleting some entry we return the number of lines touched
+        //If the SQL fails then return 0
         try {
             PreparedStatement preparedStatement = messageConnection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
@@ -80,6 +83,7 @@ public class messageSocialDAO {
             preparedStatement.executeUpdate();
             ResultSet pkeyResultSet = preparedStatement.getGeneratedKeys();
 
+            //If the message was added then create a new Message object using the returned message ID and the submitted message details.
             if(pkeyResultSet.next()){
                 int generated_message_id = pkeyResultSet.getInt(1);
                 return new Message(generated_message_id, newMessage.getPosted_by(), newMessage.getMessage_text(), newMessage.getTime_posted_epoch());
@@ -90,7 +94,8 @@ public class messageSocialDAO {
         return null;
     }
 
-    //Update Message by ID
+    //Update Message by ID.  This does not need to return anything as we have already verified that the ID exists so we can safely update it, the service will 
+    //fetch the new message once the update is complete.
     public void updateMessage(int messageID, String newMessageBody){
         Connection messageConnection = ConnectionUtil.getConnection();
         String sql = "UPDATE message SET message_text = ? WHERE message_id = ?";
@@ -105,6 +110,7 @@ public class messageSocialDAO {
             System.out.println(e.getMessage());
         }
     }
+    
 
     //Get all messages by userID
     public List<Message> usersMessages(int userID){

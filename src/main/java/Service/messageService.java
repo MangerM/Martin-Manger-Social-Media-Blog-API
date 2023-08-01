@@ -32,6 +32,7 @@ public class messageService {
     //- The response body should contain a JSON representation of the message identified by the message_id. 
     //- It is expected for the response body to simply be empty if there is no such message. The response status should always be 200, which is the default.
     public Message getMessageByID(int messageID){
+        //If the returned message is null then it found no messages.  We can still pass a null back up the chain but we print out an error message for clarity.
         Message returnedMessage = msDAO.getMessageByID(messageID);
         if(returnedMessage == null){
             System.out.println("Message ID " + messageID + " does not exist");
@@ -46,9 +47,16 @@ public class messageService {
     //- This is because the DELETE verb is intended to be idempotent, ie, multiple calls to the DELETE endpoint should respond with the same type of response.
     public Message deleteMessageByID(int messageID){
         Message returnedMessage = msDAO.getMessageByID(messageID);
-        int linesRemoved = msDAO.removeMessageByID(messageID);
-        if(linesRemoved > 0){
-            return returnedMessage;
+        //First we get a message by ID.  If this returns null we know the message does not exist (the getMessageByID method does this) so we continue if not null
+        if(returnedMessage != null){
+            int linesRemoved = msDAO.removeMessageByID(messageID);
+            //We only return the message if lines were actually deleted.  the message may exist but the delete may not remove lines so we need to return null if that case happens.
+            //In future we might want to handle this situation differently but as this is either success or fail return null.
+            if(linesRemoved > 0){
+                return returnedMessage;
+            }else{
+                return null;
+            }
         }else{
             return null;
         }
@@ -60,8 +68,22 @@ public class messageService {
     //- which is the default. The new message should be persisted to the database.
     //- If the creation of the message is not successful, the response status should be 400. (Client error)
     public Message createMessage(Message submittedMessage){
-        Message returnedMessage = msDAO.addMessage(submittedMessage);
-        return returnedMessage;
+        //We assume at this point that the posted_by exists, this would be checked at the endpoint level in the controller
+        //If the message is blank return null and print the alert.
+        if(submittedMessage.getMessage_text().isBlank()){
+            System.out.println("Blank message");
+            return null;
+
+        }else if(submittedMessage.getMessage_text().length()>=255){
+            //If the message is too long return null and print the alert.
+            System.out.println("Message Length too long");
+            return null;
+
+        }else{
+            //Otherwise add the message and return the added message.
+            Message returnedMessage = msDAO.addMessage(submittedMessage);
+            return returnedMessage;
+        }
     }
 
     //Update message by ID
@@ -70,9 +92,21 @@ public class messageService {
     //- and the response status should be 200, which is the default. The message existing on the database should have the updated message_text.
     //- If the update of the message is not successful for any reason, the response status should be 400. (Client error)
     public Message updateMessage(int messageID, String msgBody){
+        //Verify the message exists using the get message by id, if not null then update else return null.
         if(getMessageByID(messageID) != null){
-            msDAO.updateMessage(messageID, msgBody);
-            return getMessageByID(messageID);
+            //If the message is blank return null and print the alert.
+            if(msgBody.isBlank()){
+                System.out.println("Blank message");
+                return null;
+            }else if(msgBody.length() >= 255){
+                //If the message is too long return null and print the alert.
+                System.out.println("Message Length too long");
+                return null;
+            }else{
+                //message checks out, update the message
+                msDAO.updateMessage(messageID, msgBody);
+                return getMessageByID(messageID);
+            }
         }else{
             return null;
         }

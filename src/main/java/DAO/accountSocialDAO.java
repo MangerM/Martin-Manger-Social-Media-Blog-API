@@ -13,7 +13,7 @@ public class accountSocialDAO {
     //Get Existing Username
     public Account verifyUsername(String username){
         Connection accountConnection = ConnectionUtil.getConnection();
-        //We need to see if the username already exists
+        //We need to see if the username already exists.  Try to get the record from the DB and return an account with the correct info.
         try {
             String sql = "SELECT * FROM account WHERE username = ?";
 
@@ -30,6 +30,7 @@ public class accountSocialDAO {
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
+        //If we reach this point the SQL failed, either through an exception or not returning a result set so we return null.
         return null;
     }
 
@@ -53,13 +54,14 @@ public class accountSocialDAO {
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
+        //If we reach this point the SQL failed, either through an exception or not returning a result set so we return null.
         return null;
     }
 
     //Login
     public Account loginAccount(String username, String password){
         Connection accountConnection = ConnectionUtil.getConnection();
-        //We need to find an existing user with the username and password combination.  Since the person may not exist we pass null if they don't exist.
+        //We need to find an existing user with the username and password combination.
         //Similar to verify userID but using username and password instead
         try {
             String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
@@ -78,6 +80,7 @@ public class accountSocialDAO {
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
+        //If we reach this point the SQL failed, either through an exception or not returning a result set so we return null.
         return null;
     }
 
@@ -87,26 +90,22 @@ public class accountSocialDAO {
     public Account addAccount(Account newAccount){
         Connection accountConnection = ConnectionUtil.getConnection();
         //Adding a new account entry we only need a username and password
-        if(newAccount.getUsername() != "" && newAccount.getPassword().length() >= 4){
-            try{
-                String sql = "INSERT INTO account (username, password) VALUES (?, ?)" ;
-                PreparedStatement preparedStatement = accountConnection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        try{
+            String sql = "INSERT INTO account (username, password) VALUES (?, ?)" ;
+            PreparedStatement preparedStatement = accountConnection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             
-                preparedStatement.setString(1,newAccount.getUsername());
-                preparedStatement.setString(2,newAccount.getPassword());
+            preparedStatement.setString(1,newAccount.getUsername());
+            preparedStatement.setString(2,newAccount.getPassword());
     
-                preparedStatement.executeUpdate();
-                ResultSet pkeyResultSet = preparedStatement.getGeneratedKeys();
+            preparedStatement.executeUpdate();
+            ResultSet pkeyResultSet = preparedStatement.getGeneratedKeys();
     
-                if(pkeyResultSet.next()){
-                    int generated_user_id = (int) pkeyResultSet.getLong(1);
-                    return new Account(generated_user_id, newAccount.getUsername(), newAccount.getPassword());
-                }
-            }catch(SQLException e){
-                System.out.println(e.getMessage());
+            if(pkeyResultSet.next()){
+                int generated_user_id = (int) pkeyResultSet.getLong(1);
+                return new Account(generated_user_id, newAccount.getUsername(), newAccount.getPassword());
             }
-        }else{
-            System.out.println("Username is blank or password is not long enough, user not added");
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
         }
         return null;
     }

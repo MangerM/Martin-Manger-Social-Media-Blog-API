@@ -62,9 +62,11 @@ public class SocialMediaController {
     //- If the registration is not successful, the response status should be 400. (Client error)
     private void registerUser(Context context){
 
+        //As the service level handles error messages we can call the newAccount method and determine expected response based on if the result is null or not
         Account newAccount = new Account();
         newAccount = context.bodyAsClass(newAccount.getClass());
         Account returnedAccount = aService.newAccount(newAccount);
+        //If null set the expected response otherwise respond with the returned account
         if(returnedAccount == null){
             context.status(400);
             context.result("");
@@ -84,7 +86,9 @@ public class SocialMediaController {
     //- If the login is not successful, the response status should be 401. (Unauthorized)
     private void userLogin(Context context){
         Account loginAccount = new Account();
+        //Parse the body into an account so that we can handle the information within.
         loginAccount = context.bodyAsClass(loginAccount.getClass());
+        //The service level handles any errors so we can call the login method and send the expected result based on if the response is null
         Account returnedAccount = aService.login(loginAccount.getUsername(), loginAccount.getPassword());
         if(returnedAccount == null){
             context.status(401);
@@ -106,13 +110,24 @@ public class SocialMediaController {
     private void newMessage(Context context){
         Message submittedMessage = new Message();
         Message returnedMessage = new Message();
+        //Parse the body to a Message object
         submittedMessage = context.bodyAsClass(submittedMessage.getClass());
-        if(aService.userIDExist(submittedMessage.getPosted_by()) && submittedMessage.getMessage_text().length() < 255 && submittedMessage.getMessage_text() != ""){
+        //If the userID exists then we can create a new message.  
+        if(aService.userIDExist(submittedMessage.getPosted_by())){
+
+            //The service level handles verifying the message length so we can call createMessage
             returnedMessage = mService.createMessage(submittedMessage);
-            try {
-                context.result(objectMapper.writeValueAsString(returnedMessage));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
+
+            //If null then we also return the error and null string, else parse the result and submit the result
+            if(returnedMessage == null){
+                context.status(400);
+                context.result("");
+            }else{
+                try {
+                    context.result(objectMapper.writeValueAsString(returnedMessage));
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
             }
         }else{
             context.status(400);
@@ -183,6 +198,7 @@ public class SocialMediaController {
         String newContent = "";
         Message newMessage = null;
         Message returnedMessage = null;
+        //Parse the body to a Message object so we can get the data
         try {
             newMessage = objectMapper.readValue(context.body(), Message.class);
         } catch (JsonMappingException e) {
@@ -190,11 +206,11 @@ public class SocialMediaController {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+        //Get the message text
         newContent = newMessage.getMessage_text();
-        if(newContent != "" && newContent.length() < 255){
-            returnedMessage = mService.updateMessage(messageID, newContent);
-        }
-        
+        returnedMessage = mService.updateMessage(messageID, newContent);
+
+        //As long as we don't get a null response we can set the result to the message otherwise set the status and result as expected
         if (returnedMessage != null){
             try {
                 context.result(objectMapper.writeValueAsString(returnedMessage));
