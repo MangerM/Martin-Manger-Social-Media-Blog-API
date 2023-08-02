@@ -30,7 +30,7 @@ public class SocialMediaController {
     public Javalin startAPI() {
         
 
-        //Included endpoints are needed for the project, there are more available DAO operations (get all users for example) that exist but are not used for the project.
+        //Included endpoints are needed for the project (excluding example), there are more available DAO operations (get all users for example) that exist but are not used for the project.
         //They have been included in the DAO and Service but not marked with an endpoint because they were useful for manual testing and if the project were to be expanded
         //in future then the background code already exists.
         Javalin app = Javalin.create();
@@ -130,6 +130,7 @@ public class SocialMediaController {
                 }
             }
         }else{
+            //While the error status is the same, in future we may want to submit a specific status to differentiate between an invalid userID or a message length failure
             context.status(400);
             context.result("");
         }
@@ -151,6 +152,7 @@ public class SocialMediaController {
             context.result("");
         }
     }
+    
 
     //Get Specific Message Endpoint
     //- The response body should contain a JSON representation of the message identified by the message_id. 
